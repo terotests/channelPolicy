@@ -3,16 +3,6 @@
 
 The clients C1, C2 (...N)  and server C1 have main files &Omega;C1  &Omega;C2 and  &Omega;S1 which represent the object structure 
 
-The client and server have journals, which construct of changes &Delta
-
-The change object itself is a change command in form
-
-```javascript
-[4, "x", 100, 50, "objectID"]
-```
-
-Which would represent objects property "x" changing from 50 to 100.
-
 The main file of the server and client &Omega; is something like this;
 
 ```javascript
@@ -23,6 +13,18 @@ The main file of the server and client &Omega; is something like this;
    __id : "objectID"
 }
 ```
+
+The client and server have journals, which construct of changes &Delta;
+
+The change object itself is a change command in form
+
+```javascript
+[4, "x", 100, 50, "objectID"]
+```
+
+Which would represent objects property "x" changing from 50 to 100.
+
+
 
 After change &Delta; is applied to the main file, the object will be transformed into a new object.
 
