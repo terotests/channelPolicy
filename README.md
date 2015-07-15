@@ -35,12 +35,12 @@ After change &Delta; is applied to the main file, the object will be transformed
 }
 ```
 
-In the journal the first change is &Delta;[0] and range of changes &Delta;[0-3]. For exampe
+In the journal the first change is &Delta;[0] and range of changes like &Delta;[32-34]. For example:
 
 ```javascript
-[4, "x", 100, 50,  "objectID"]
-[4, "y", 210, 180, "objectID"]
-[4, "z", 170, 150, "objectID"]
+[4, "x", 100, 50,  "objectID"]  // &Delta;[32]
+[4, "y", 210, 180, "objectID"]  // &Delta;[33]
+[4, "z", 170, 150, "objectID"]  // &Delta;[34]
 ```
 
 The change request packet is actually a bit more complex, it will be something like this;
@@ -50,7 +50,7 @@ The change request packet is actually a bit more complex, it will be something l
     id          : "transaction ID",     // unique ID for transaction
     socket_id   : "socketid",           // added by the server
     v : 1,                              // main file + journal version
-    lu : [1,10],                        // last update from server 0..N
+    lu : [1,32],                        // version + journal line of last server update
     tl : 1,                             // transaction level
     c : [
         [4, "x", 100, 50,  "objectID"]
@@ -60,15 +60,16 @@ The change request packet is actually a bit more complex, it will be something l
 }
 ```
 
+The only thing server really cares is that client has got the last update it has sent, this can be seen from `lu : [1,32]` which server will check against it's own bookkeeping.
+
 
 The rules of the changes are:
 
-1. Clients are sending the &Delta;[n-m] changes to the server
-2. When client makes a change it will immediately apply &Delta;[n-m] to it's own main &Omega; but it will keep track of where was the last good server change index.
-3. IF server get's &Delta;[n-m] it will try to apply the change to &Omega;S1
-4. The server can apply the client's &Delta;[n-m] to it's own &Omega;S1 it should update unsent changes &Delta;&Delta;
-5. Periodically the server will send the &Delta;&Delta; to all clients - **this is the moment when things start usually go wrong** before this clients have been happily making their own changes without knowing about the changes other clients have done to their own main files.
-6. If client gets &Delta;&Delta; from server, it should upgrade it's own &Delta; buffer and &Omega; to correspond those changes if it wants to keep in-sync with other clients
+1. When client makes a change it will immediately apply &Delta;[n-m] to it's own main &Omega; but it will keep track of where was the last good server change index.
+2. Then client sends it's local &Delta;[n-m] to the server
+3. When server get's &Delta;[n-m] it will try to apply the change to it's own &Omega;S1
+4. Periodically the server sends new journa lines it has accepted, the  &Delta;&Delta; to all clients - **this is the moment when things start usually go wrong** before this clients have been happily making their own changes without knowing about the changes other clients have done to their own main files.
+5. When client gets &Delta;&Delta; from server, it must update it's own state to correspond those changes **easy to say but not to implement**
 
 The purpose of the `channelPolicy` is to be able to determine and test those change policies and what kind of results they will create if applied in certain order.
 
