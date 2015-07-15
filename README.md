@@ -44,9 +44,9 @@ The rules of the changes are:
 1. Clients are sending the &Delta;[n-m] changes to the server
 2. When client makes a change it will immediately apply &Delta;[n-m] to it's own main &Omega; but it will keep track of where was the last good server change index.
 3. IF server get's &Delta;[n-m] it will try to apply the change to &Omega;S1
-4. The server can apply the client's &Delta;[n-m] to it's own &Omega;S1 it should update unsent changes &Delta;&Delta;S1[i-j]
-5. Periodically the server will send the &Delta;&Delta;S1[i-j] to all clients
-6. If client gets &Delta;&Delta;S1[i-j] from server, it must upgrade it's own status to correspond that change
+4. The server can apply the client's &Delta;[n-m] to it's own &Omega;S1 it should update unsent changes &Delta;&Delta;
+5. Periodically the server will send the &Delta; to all clients
+6. If client gets &Delta;&Delta; from server, it must upgrade it's own &Delta; buffer and &Omega; to correspond those changes
 
 The question here is now, if clients C1..CN are sending &Delta changes to the server in unspecified order
 
