@@ -60,7 +60,8 @@ The change request packet is actually a bit more complex, it will be something l
 }
 ```
 
-The only thing server really cares is that client has got the last update it has sent, this can be seen from `lu : [1,32]` which server will check against it's own bookkeeping. Later this update will be referred as &Delta;&Delta;.
+The server is not really too interested about the metadata client sends. The server is just trying to apply the changes the
+client sends then at some point create an update to all clients of the changed state. This update will be referred as &Delta;&Delta;.
 
 
 The rules of the changes are:
@@ -113,42 +114,7 @@ The `fail_tolastok` is "go until failure" -mode where commands are processed unt
 
 # Return values from transaction
 
-## Success
 
-The success object has
-
-1. `result` is se to `true`
-2. `validCnt` number of valid commands in the request frame
-
-
-```javascript
-{ "id":"transaction ID",
-  "from":0,
-  "result":true,        // <-- indicates the transaction was OK.
-  "rollBack":false   
-}
-```
-
-## Failure
-
-The failure object has
-
-1. `result` is se to `false`
-2. `rollBack` can be true / false
-3. `rollBackTo` indicates the journal line the client should rollback to
-4. `validCnt` number of valid commands in the request frame
-
-
-```javascript
-{   "id":"transaction ID",
-    "validCnt" : 2,         // number of valid commands
-    "from":3,
-    "result":false,
-    "rollBack":true,
-    "failed":[],
-    "rollBackTo":3          // <- line the client should roll back to
-}
-```
 
 
 
@@ -192,6 +158,7 @@ The failure object has
 - [_pseudoClientOnUpdate](README.md#_chPolicy__pseudoClientOnUpdate)
 - [_pseudoOnFrameServer](README.md#_chPolicy__pseudoOnFrameServer)
 - [_pseudoRunFrame](README.md#_chPolicy__pseudoRunFrame)
+- [constructDeltaDelta](README.md#_chPolicy_constructDeltaDelta)
 - [deltaClientToServer](README.md#_chPolicy_deltaClientToServer)
 - [deltaServerToClient](README.md#_chPolicy_deltaServerToClient)
 - [execute](README.md#_chPolicy_execute)
@@ -562,6 +529,26 @@ try {
     res.result = false;
     return res;
 }
+```
+
+### <a name="_chPolicy_constructDeltaDelta"></a>_chPolicy::constructDeltaDelta(serverState)
+
+
+```javascript
+
+var dd = {
+        
+};
+
+var chData = serverState.data;
+
+// last_update : [1, 30]
+var end = chData._journal.length;
+dd.c = chData._journal.slice( serverState.last_update[1], end );
+
+serverState.last_update[1] = end;
+
+
 ```
 
 ### <a name="_chPolicy_deltaClientToServer"></a>_chPolicy::deltaClientToServer(clientFrame, serverState)

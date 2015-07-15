@@ -358,6 +358,22 @@
         };
 
         /**
+         * @param Object serverState
+         */
+        _myTrait_.constructDeltaDelta = function (serverState) {
+
+          var dd = {};
+
+          var chData = serverState.data;
+
+          // last_update : [1, 30]
+          var end = chData._journal.length;
+          dd.c = chData._journal.slice(serverState.last_update[1], end);
+
+          serverState.last_update[1] = end;
+        };
+
+        /**
          * @param Object clientFrame  - This is the clients changeFrame which should be applied to the servers internal state
          * @param Object serverState  - This object holds the data the server needs
          */
