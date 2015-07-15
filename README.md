@@ -56,16 +56,15 @@ TODO: continue from here
 
 
 
-# Format of transaction 
+# Clients &Delta; package format
 
 Transaction object has following properties
 
 1. `id` unique id UUID of the transaction
-2. `version` indicates the main file version (currently not used)
-3. `from` the line where the transaction starts, if lines are not matching, the transaction could still proceed, but for now it does not.
-3. `fail_all` if set to true, all commands must succeed in order to transaction to complete
-4. `fail_tolastok` if set to true, all successfull commands will be saved until first error
-5. `commands` is array of [Channel Object commands](https://github.com/terotests/_channelObjects)
+2. `v` indicates the main file version (currently not used)
+3. `lu` the last server update version + line number.
+3. `tl`transaction level
+4. `c` commands, Array of [Channel Object commands](https://github.com/terotests/_channelObjects)
 
 The `fail_all` is "all or nothing" -mode where all commands either fail or succeed.
 
@@ -74,12 +73,10 @@ The `fail_tolastok` is "go until failure" -mode where commands are processed unt
 ```javascript
 {
     id   : "transaction ID",        // unique ID for transaction
-    version : 1,                    // channel version
-    from : 10,                      // journal line to start the change
-    to   : 20,                      // the last line ( optionsl, I guess )
-    fail_all : false,               // fail all commands if failure
-    fail_tolastok : true,           // fail until last ok command
-    commands : [
+    v : 1,                          // main file + journal version
+    lu : [1,10],                        // last update from server 0..N
+    tl : 1,                          // transaction level
+    c : [
                                     // list of channel commands to run
     ]
 }
