@@ -124,18 +124,6 @@
 
             var chData = serverState.data; // the channel data object
 
-            var client_version = clientFrame.lu[0],
-                client_line = clientFrame.lu[1],
-                server_lu_version = serverState.last_update[0],
-                server_lu_line = serverState.last_update[1];
-
-            // the client is lagging so badly, we mark down it must be sent a refresh request
-            if (client_version != serverState.version || server_lu_version != client_version || client_verson < server_lu_version) {
-              if (!serverState.lagging_sockets) serverState.lagging_sockets = {};
-              serverState.lagging_sockets[clientFrame.socket_id] = true;
-              return;
-            }
-
             // now, it's simple, we just try to apply all the comands
             for (var i = 0; i < clientFrame.c.length; i++) {
               var c = clientFrame.c[i];
