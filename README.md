@@ -4,10 +4,19 @@
 The following notations are used here
 
 
-  &Delta;S1 = server change 1
+  &Delta;S1 = server transaction 1
+  
+  &Delta;SN = server transaction 1..N
+  
+  &Delta;C1 = Client transaction 1
+  
+  &Delta;CN = Client transaction 1..N
+  
   
   &nabla;R1 = rollback
-  
+
+  &int;S1   = Server 1 main file
+
   &int;C1   = Client 1 main file
   
   &int;C2   = Client 2 main file
