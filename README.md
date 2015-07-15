@@ -60,7 +60,7 @@ The change request packet is actually a bit more complex, it will be something l
 }
 ```
 
-The only thing server really cares is that client has got the last update it has sent, this can be seen from `lu : [1,32]` which server will check against it's own bookkeeping.
+The only thing server really cares is that client has got the last update it has sent, this can be seen from `lu : [1,32]` which server will check against it's own bookkeeping. Later this update will be referred as &Delta;&Delta;.
 
 
 The rules of the changes are:
