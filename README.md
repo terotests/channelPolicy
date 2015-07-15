@@ -248,22 +248,20 @@ _instanceCache[id] = this;
 
 ```javascript
 
-var dd = {
-        
-};
-
 var chData = serverState.data;
 
 // last_update : [1, 30]
 var start = serverState.last_update[1];
 var end = chData._journal.length;
-dd.c = chData._journal.slice( start, end );
-dd.start = start;
-dd.version = serverState.version;
 
-serverState.last_update[1] = end;
+if( start == end ) return null;
 
-return dd;
+return {
+    c : chData._journal.slice( start, end ),
+    start : start,
+    version : serverState.version
+};
+
 
 
 ```
@@ -334,6 +332,25 @@ try {
 
 ```javascript
 
+// the client state
+/*
+{
+    data : channelData,     // The channel data object
+    version : 1,
+    last_update : [1, 30],  // last server update
+}
+*/
+
+// the server sends
+/*
+{
+    version : 1,                    // the main file + journal version
+    start : 34,                     // journal line index
+    c : [
+                                    // list of channel commands to run
+    ]
+}
+*/
 ```
 
 ### _chPolicy::constructor( channelId, channelData )
