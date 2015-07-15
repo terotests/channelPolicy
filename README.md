@@ -1,9 +1,7 @@
 
 # Channel Policy - merging incoming data
 
-The clients C1, C2 (...N)  and server C1 have main files &Omega;C1  &Omega;C2 and  &Omega;S1 which represent the object structure 
-
-The main file of the server and client &Omega; is something like this;
+The purpose of Channel Policy is to keep the main file &Omega; in sync between clients and server
 
 ```javascript
 {
