@@ -1,7 +1,16 @@
 
 # Channel Policy - merging incoming data
 
-The following notations are used here
+The clients C1, C2 (...N)  and server C1 have main files &int;C1  &int;C2 and  &int;S1 which represent the object structure 
+
+1. deltaClientToServer => &Delta;C1 
+2. deltaServerToClient => &Delta;S1 
+
+
+
+# Notations
+
+Thinking about the notations - which notations might represent well the data progress?
 
 
   &Delta;S1 = server transaction 1
@@ -141,6 +150,8 @@ The failure object has
 - [_pseudoClientOnUpdate](README.md#_chPolicy__pseudoClientOnUpdate)
 - [_pseudoOnFrameServer](README.md#_chPolicy__pseudoOnFrameServer)
 - [_pseudoRunFrame](README.md#_chPolicy__pseudoRunFrame)
+- [deltaClientToServer](README.md#_chPolicy_deltaClientToServer)
+- [deltaServerToClient](README.md#_chPolicy_deltaServerToClient)
 - [execute](README.md#_chPolicy_execute)
 - [rollBack](README.md#_chPolicy_rollBack)
 
@@ -509,6 +520,28 @@ try {
     res.result = false;
     return res;
 }
+```
+
+### <a name="_chPolicy_deltaClientToServer"></a>_chPolicy::deltaClientToServer(clientFrame, serverState)
+`clientFrame` This is the clients changeFrame which should be applied to the servers internal state
+ 
+`serverState` This object holds the data the server needs
+ 
+
+
+```javascript
+
+```
+
+### <a name="_chPolicy_deltaServerToClient"></a>_chPolicy::deltaServerToClient(updateFrame, clientState)
+`updateFrame` request from server to client
+ 
+`clientState` This object holds the data the client needs to pefrform it&#39;s actions
+ 
+
+
+```javascript
+
 ```
 
 ### <a name="_chPolicy_execute"></a>_chPolicy::execute(changeFrame)

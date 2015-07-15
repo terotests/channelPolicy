@@ -358,6 +358,18 @@
         };
 
         /**
+         * @param Object clientFrame  - This is the clients changeFrame which should be applied to the servers internal state
+         * @param Object serverState  - This object holds the data the server needs
+         */
+        _myTrait_.deltaClientToServer = function (clientFrame, serverState) {};
+
+        /**
+         * @param Object updateFrame  - request from server to client
+         * @param float clientState  - This object holds the data the client needs to pefrform it&#39;s actions
+         */
+        _myTrait_.deltaServerToClient = function (updateFrame, clientState) {};
+
+        /**
          * @param Object changeFrame
          */
         _myTrait_.execute = function (changeFrame) {
