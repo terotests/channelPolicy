@@ -8,7 +8,9 @@ The following notations are used here
   
   &nabla;R1 = rollback
   
-  &int; = main faile 1
+  &int;C1   = Client 1 main file
+  
+  &int;C2   = Client 2 main file
   
 
 
