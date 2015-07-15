@@ -361,7 +361,59 @@
          * @param Object clientFrame  - This is the clients changeFrame which should be applied to the servers internal state
          * @param Object serverState  - This object holds the data the server needs
          */
-        _myTrait_.deltaClientToServer = function (clientFrame, serverState) {};
+        _myTrait_.deltaClientToServer = function (clientFrame, serverState) {
+          // the client frame
+          /*
+          {
+          id          : "transaction ID",        // unique ID for transaction
+          socket_id   : "socketid",              // added by the server
+          v : 1,                          // main file + journal version
+          lu : [1,10],                        // last update from server 0..N
+          tl : 1,                          // transaction level
+          c : [
+                                    // list of channel commands to run
+          ]
+          }
+          */
+          // the server state structure
+          /*
+          {
+          data : channelData,     // The channel data object
+          version : 1,
+          last_update : [1, 30],  // version + journal line
+          lagging_sockets : {}    // hash of invalid sockets
+          }
+          */
+
+          try {
+
+            if (!clientFrame.id) return;
+            if (!clientFrame.socket_id) return;
+            if (this._done[clientFrame.id]) return res;
+
+            this._done[clientFrame.id] = true;
+
+            var chData = serverState.data; // the channel data object
+
+            var client_version = clientFrame.lu[0],
+                client_line = clientFrame.lu[1],
+                server_lu_version = serverState.last_update[0],
+                server_lu_line = serverState.last_update[1];
+
+            // the client is lagging so badly, we mark down it must be sent a refresh request
+            if (client_version != serverState.version || server_lu_version != client_version || client_verson < server_lu_version) {
+              if (!serverState.lagging_sockets) serverState.lagging_sockets = {};
+              serverState.lagging_sockets[clientFrame.socket_id] = true;
+              return;
+            }
+
+            // now, it's simple, we just try to apply all the comands
+            for (var i = 0; i < clientFrame.c.length; i++) {
+              var c = clientFrame.c[i];
+              chData.execCmd(c);
+            }
+          } catch (e) {}
+        };
 
         /**
          * @param Object updateFrame  - request from server to client
@@ -567,3 +619,5 @@
     define(__amdDefs__);
   }
 }).call(new Function('return this')());
+
+// in this version, NO PROBLEMO!

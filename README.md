@@ -35,7 +35,31 @@ After change &Delta; is applied to the main file, the object will be transformed
 }
 ```
 
-In the journal the first change is &Delta;[0] and range of changes &Delta;[0-10]
+In the journal the first change is &Delta;[0] and range of changes &Delta;[0-3]. For exampe
+
+```javascript
+[4, "x", 100, 50,  "objectID"]
+[4, "y", 210, 180, "objectID"]
+[4, "z", 170, 150, "objectID"]
+```
+
+The change request packet is actually a bit more complex, it will be something like this;
+
+```javascript
+{
+    id          : "transaction ID",     // unique ID for transaction
+    socket_id   : "socketid",           // added by the server
+    v : 1,                              // main file + journal version
+    lu : [1,10],                        // last update from server 0..N
+    tl : 1,                             // transaction level
+    c : [
+        [4, "x", 100, 50,  "objectID"]
+        [4, "y", 210, 180, "objectID"]
+        [4, "z", 170, 150, "objectID"]                                       
+    ]
+}
+```
+
 
 The rules of the changes are:
 
@@ -53,6 +77,10 @@ TODO: continue from here
 ```javascript
 
 ```
+
+## TL;RD;
+
+Clients are sending changes to server - server merges them into one datastructure and sends periodicallly the changes to the real version back to the client. This module is all about trying to solve that problem.
 
 
 
@@ -543,6 +571,67 @@ try {
 
 
 ```javascript
+// the client frame
+/*
+{
+    id          : "transaction ID",        // unique ID for transaction
+    socket_id   : "socketid",              // added by the server
+    v : 1,                          // main file + journal version
+    lu : [1,10],                        // last update from server 0..N
+    tl : 1,                          // transaction level
+    c : [
+                                    // list of channel commands to run
+    ]
+}
+*/
+// the server state structure
+/*
+{
+    data : channelData,     // The channel data object
+    version : 1,
+    last_update : [1, 30],  // version + journal line
+    lagging_sockets : {}    // hash of invalid sockets
+}
+*/
+
+
+
+try {
+        
+    if(!clientFrame.id) return;
+    if(!clientFrame.socket_id) return;
+    if(this._done[clientFrame.id]) return res;
+    
+    this._done[clientFrame.id] = true;    
+    
+    var chData = serverState.data; // the channel data object
+    
+    var client_version = clientFrame.lu[0],
+        client_line = clientFrame.lu[1],
+        server_lu_version = serverState.last_update[0],
+        server_lu_line = serverState.last_update[1];
+        
+    // the client is lagging so badly, we mark down it must be sent a refresh request
+    if(     client_version != serverState.version || 
+            server_lu_version != client_version ||
+            ( client_verson  < server_lu_version )
+        ) {
+        if(!serverState.lagging_sockets) serverState.lagging_sockets = {};
+        serverState.lagging_sockets[clientFrame.socket_id] = true;
+        return;
+    }
+
+    // now, it's simple, we just try to apply all the comands
+    for(var i=0; i<clientFrame.c.length; i++) {
+        var c = clientFrame.c[i];
+        chData.execCmd(c);
+    }
+
+} catch(e) {
+    // in this version, NO PROBLEMO!
+}
+
+
 
 ```
 
