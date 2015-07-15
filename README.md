@@ -45,10 +45,10 @@ The rules of the changes are:
 2. When client makes a change it will immediately apply &Delta;[n-m] to it's own main &Omega; but it will keep track of where was the last good server change index.
 3. IF server get's &Delta;[n-m] it will try to apply the change to &Omega;S1
 4. The server can apply the client's &Delta;[n-m] to it's own &Omega;S1 it should update unsent changes &Delta;&Delta;
-5. Periodically the server will send the &Delta;&Delta; to all clients
-6. If client gets &Delta;&Delta; from server, it must upgrade it's own &Delta; buffer and &Omega; to correspond those changes
+5. Periodically the server will send the &Delta;&Delta; to all clients - **this is the moment when things start usually go wrong** before this clients have been happily making their own changes without knowing about the changes other clients have done to their own main files.
+6. If client gets &Delta;&Delta; from server, it should upgrade it's own &Delta; buffer and &Omega; to correspond those changes if it wants to keep in-sync with other clients
 
-The question here is now, if clients C1..CN are sending &Delta changes to the server in unspecified order
+The purpose of the `channelPolicy` is to be able to determine and test those change policies and what kind of results they will create if applied in certain order.
 
 TODO: continue from here
 
