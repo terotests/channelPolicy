@@ -367,10 +367,15 @@
           var chData = serverState.data;
 
           // last_update : [1, 30]
+          var start = serverState.last_update[1];
           var end = chData._journal.length;
-          dd.c = chData._journal.slice(serverState.last_update[1], end);
+          dd.c = chData._journal.slice(start, end);
+          dd.start = start;
+          dd.version = serverState.version;
 
           serverState.last_update[1] = end;
+
+          return dd;
         };
 
         /**

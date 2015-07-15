@@ -111,6 +111,18 @@ The `fail_tolastok` is "go until failure" -mode where commands are processed unt
     ]
 }
 ```
+# Servers &Delta;&Delta; package format
+
+```javascript
+{
+    version : 1,                    // the main file + journal version
+    start : 34,                     // journal line index
+    c : [
+                                    // list of channel commands to run
+    ]
+}
+```
+
 
 # Return values from transaction
 
@@ -543,10 +555,15 @@ var dd = {
 var chData = serverState.data;
 
 // last_update : [1, 30]
+var start = serverState.last_update[1];
 var end = chData._journal.length;
-dd.c = chData._journal.slice( serverState.last_update[1], end );
+dd.c = chData._journal.slice( start, end );
+dd.start = start;
+dd.version = serverState.version;
 
 serverState.last_update[1] = end;
+
+return dd;
 
 
 ```
