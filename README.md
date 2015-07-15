@@ -42,7 +42,7 @@ The rules of the changes are:
 1. Clients are sending the &Delta;[n-m] changes to the server
 2. When client makes a change it will immediately apply &Delta;[n-m] to it's own main &Omega;SN but it will keep track of where was the last good server change index.
 3. IF server get's &Delta;[n-m] it will try to apply the change to &Omega;S1
-4. The server will apply the valid &Delta;[n-m] to it's own &Omega;S1 and maintain the list of recent changes &DeltaS1;[i-j]
+4. The server will apply the valid &Delta;[n-m] to it's own &Omega;S1 and maintain the list of recent changes &Delta;S1[i-j]
 5. Periodically the server will send the &Delta;S1[i-j] to all clients
 6. If client gets &Delta;S1[i-j] from server, it must upgrade it's own status to correspond that change
 
