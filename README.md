@@ -82,7 +82,7 @@ TODO: continue from here
 
 ## TL;RD;
 
-Clients are sending changes to server - server merges them into one datastructure and sends periodicallly the changes to the real version back to the client. This module is all about trying to solve that problem.
+Clients are sending changes to server - server merges them into one datastructure and sends periodicallly the changes to the real version back to the client. The clients then try to fix their data to correspond the changes.
 
 
 
