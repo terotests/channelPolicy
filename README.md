@@ -70,7 +70,7 @@ The flow of the data is something like thiss
 2. Then client sends it's latest &Delta; to the server
 3. When server get's &Delta; it will try to apply the change to it's own &Omega;
 4. Periodically the server sends all new journal lines it has accepted to all clients, the  &Delta;&Delta; to all clients - **this is the moment when things start usually go wrong** before this clients have been happily making their own changes without knowing about the changes other clients have done to their own main files.
-5. **All clients are listening** - when a client gets &Delta;&Delta; from server, it must update it's own state to correspond those changes **easy to say **
+5. **All clients are listening for &Delta;&Delta;** - when a client gets &Delta;&Delta; from server, it must update it's own state to correspond those changes **easy to say**
 
 The purpose of the `channelPolicy` is to be able to determine and test those change policies and what kind of results they will create if applied in certain order.
 
