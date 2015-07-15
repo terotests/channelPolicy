@@ -1,36 +1,52 @@
 
 # Channel Policy - merging incoming data
 
-The clients C1, C2 (...N)  and server C1 have main files &int;C1  &int;C2 and  &int;S1 which represent the object structure 
+The clients C1, C2 (...N)  and server C1 have main files &Omega;C1  &Omega;C2 and  &Omega;S1 which represent the object structure 
 
-1. deltaClientToServer => &Delta;C1 
-2. deltaServerToClient => &Delta;S1 
+The client and server have journals, which construct of changes &Delta
 
+The change object itself is a change command in form
 
+```javascript
+[4, "x", 100, 50, "objectID"]
+```
 
-# Notations
+Which would represent objects property "x" changing from 50 to 100.
 
-Thinking about the notations - which notations might represent well the data progress?
+The main file of the server and client &Omega; is something like this;
 
+```javascript
+{
+  data : {
+      x : 50
+  },
+   __id : "objectID"
+}
+```
 
-  &Delta;S1 = server transaction 1
-  
-  &Delta;SN = server transaction 1..N
-  
-  &Delta;C1 = Client transaction 1
-  
-  &Delta;CN = Client transaction 1..N
-  
-  
-  &nabla;R1 = rollback
+After change &Delta is applied to the main file, the object will be transformed into a new object.
 
-  &int;S1   = Server 1 main file
+```javascript
+{
+  data : {
+      x : 100
+  },
+   __id : "objectID"
+}
+```
 
-  &int;C1   = Client 1 main file
-  
-  &int;C2   = Client 2 main file
-  
+In the journal the first change is &Delta[0] and range of changes &Delta[0-10]
 
+The rules of the changes are:
+
+1. Clients are sending the &Delta[n-m] changes to the server
+2. When client makes a change it will immediately apply &Delta[n-m] to it's own main &Omega;SN but it will keep track of where was the last good server change index.
+3. IF server get's &Delta[n-m] it will try to apply the change to &Omega;S1
+4. The server will apply the valid &Delta[n-m] to it's own &Omega;S1 and maintain the list of recent changes &DeltaS1[i-j]
+5. Periodically the server will send the &DeltaS1[i-j] to all clients
+6. If client gets &DeltaS1[i-j] from server, it must upgrade it's own status to correspond that change
+
+The question here is now, if clients C1..CN are sending &Delta changes to the server in unspecified order
 
 TODO: continue from here
 
