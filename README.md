@@ -118,13 +118,26 @@ The `fail_tolastok` is "go until failure" -mode where commands are processed unt
     version : 1,                    // the main file + journal version
     start : 34,                     // journal line index
     c : [
-                                    // list of channel commands to run
+                                    // the servers Omega file commands
     ]
 }
 ```
 
 
-# Return values from transaction
+# What next?
+
+The challenge is to apply &Delta;&Delta; packages so the local changes with mimimum effort. With minimum effort the goal is:
+
+1. Do not create extra events if you need to rollback and re-apply changes
+2. This means that output events to workers by channelObject must be collected first to event stream
+3. The channel object should have en easy-to-use comparision function
+
+The bonus with the event stream out from the channelObject might be that Event Streams / Rx functionailty might be easy to add to the event value streams in a defined way. Normally the streams are data-agnostic, they only move values, which means that they can not automatically optimize changes. Event streams coming from the &Delta; changes can be automatically compressed and buffered, because the semantics of the changes is well known ahead. The changes can also be more complex than just value -based.
+
+
+
+
+
 
 
 
