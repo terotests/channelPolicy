@@ -96,9 +96,6 @@ Transaction object has following properties
 3. `tl`transaction level
 4. `c` commands, Array of [Channel Object commands](https://github.com/terotests/_channelObjects)
 
-The `fail_all` is "all or nothing" -mode where all commands either fail or succeed.
-
-The `fail_tolastok` is "go until failure" -mode where commands are processed until first error and client is asked to roll back to that situation.
 
 ```javascript
 {
