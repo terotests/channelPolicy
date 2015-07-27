@@ -94,34 +94,8 @@ The clients's state object looks like this:
 }
 ```
 
-## TL;RD;
-
-Clients are sending changes to server - server merges them into one datastructure and sends periodicallly the changes to the real version back to the client. The clients then try to fix their data to correspond the changes.
 
 
-
-# Clients &Delta; package format
-
-Transaction object has following properties
-
-1. `id` unique id UUID of the transaction
-2. `v` indicates the main file version (currently not used)
-3. `lu` the last server update version + line number.
-3. `tl`transaction level
-4. `c` commands, Array of [Channel Object commands](https://github.com/terotests/_channelObjects)
-
-
-```javascript
-{
-    id   : "transaction ID",        // unique ID for transaction
-    v : 1,                          // main file + journal version
-    lu : [1,10],                        // last update from server 0..N
-    tl : 1,                          // transaction level
-    c : [
-                                    // list of channel commands to run
-    ]
-}
-```
 # Servers to Client = &Delta;&Delta; package format
 
 ```javascript
@@ -133,16 +107,6 @@ Transaction object has following properties
 }
 ```
 
-
-# What next?
-
-The challenge is to apply &Delta;&Delta; packages so the local changes with mimimum effort. With minimum effort the goal is:
-
-1. Do not create extra events if you need to rollback and re-apply changes
-2. This means that output events to workers by channelObject must be collected first to event stream
-3. The channel object should have en easy-to-use comparision function
-
-The bonus with the event stream out from the channelObject might be that Event Streams / Rx functionailty might be easy to add to the event value streams in a defined way. Normally the streams are data-agnostic, they only move values, which means that they can not automatically optimize changes. Event streams coming from the &Delta; changes can be automatically compressed and buffered, because the semantics of the changes is well known ahead. The changes can also be more complex than just value -based.
 
 
 
