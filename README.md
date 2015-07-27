@@ -1,7 +1,9 @@
 
 # Channel Policy - merging incoming data
 
-The purpose of Channel Policy is to keep the main file &Omega; in sync between clients and server
+The purpose of Channel Policy is to create patch objects and apply the patches to Objects. The clients are sending changes to the data to the Server and server will merge that data to it's own central state. Periodically the Server is going to send update to the clients about the current valid state of the Object, clients are responsible for updating their own state accordingly.
+
+The Object is represented by JavaScript object of structure:
 
 ```javascript
 {
@@ -12,7 +14,7 @@ The purpose of Channel Policy is to keep the main file &Omega; in sync between c
 }
 ```
 
-The client and server have journals, which construct of changes &Delta;
+The client and server have journals, which construct of change Commands &Delta; to the objects.
 
 The change object itself is a change command in form
 
@@ -21,8 +23,6 @@ The change object itself is a change command in form
 ```
 
 Which would represent objects property "x" changing from 50 to 100.
-
-
 
 After change &Delta; is applied to the main file, the object will be transformed into a new object.
 
@@ -35,7 +35,7 @@ After change &Delta; is applied to the main file, the object will be transformed
 }
 ```
 
-In the journal the first change is &Delta;[0] and range of changes like &Delta;[32-34]. For example:
+List of commands is called `journal`
 
 ```javascript
 [4, "x", 100, 50,  "objectID"]  // &Delta;[32]
@@ -43,7 +43,7 @@ In the journal the first change is &Delta;[0] and range of changes like &Delta;[
 [4, "z", 170, 150, "objectID"]  // &Delta;[34]
 ```
 
-The change request packet contains the changes for the server. The package is created by functions
+The change request packet (patch) contains the changes for the server. The package is created by functions
 
 1. constructClientToServer
 2. constructServerToClient
@@ -56,7 +56,7 @@ The change packate is then sent either from the server to client or client to se
     start : 10,                         // journal start line
     end   : 13,                         // journal end line
     c : [
-        [4, "x", 100, 50,  "objectID"]
+        [4, "x", 100, 50,  "objectID"]  // commands to apply to the object
         [4, "y", 210, 180, "objectID"]
         [4, "z", 170, 150, "objectID"]                                       
     ]
@@ -70,7 +70,23 @@ Both client and server have a state, which contains information for the patching
 
 The functions mission is to apply the changes to the server state or client state.
 
+# The workflow
+
+The usual workflow goes like this:
+
+1. The "delta" form a client using `constructClientToServer` is constructed at a client
+2. this "delta" is sent to server and applied there using `deltaClientToServer`
+3. After a while the server will create a new "delta" using `constructServerToClient`
+4. This change is then applied to each client using `deltaServerToClient`
+
+Clients can send multiple deltas to the server before it will create it's own delta to be sent to the clients.
+
+# The state of client and server
+
+The client and server state is stored to plain JS Object and given as a parameter to the functions.
+
 The server's state object looks like this:
+
 ```javascript
 {
     data : channelData,     // The channel data object
