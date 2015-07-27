@@ -55,16 +55,6 @@
 
         // Initialize static variables here...
 
-        if (!_myTrait_.hasOwnProperty('__factoryClass')) _myTrait_.__factoryClass = [];
-        _myTrait_.__factoryClass.push(function (id) {
-
-          if (!_instanceCache) _instanceCache = {};
-
-          if (_instanceCache[id]) return _instanceCache[id];
-
-          _instanceCache[id] = this;
-        });
-
         /**
          * @param Object clientState
          */
@@ -161,15 +151,15 @@
           }
           */
 
-          if (!this._done) this._done = {};
+          if (!serverState._done) serverState._done = {};
 
           try {
 
             if (!clientFrame.id) return;
             // if(!clientFrame.socket_id) return;
-            if (this._done[clientFrame.id]) return res;
+            if (serverState._done[clientFrame.id]) return res;
 
-            this._done[clientFrame.id] = true;
+            serverState._done[clientFrame.id] = true;
 
             var chData = serverState.data; // the channel data object
             var errors = [];
@@ -308,10 +298,6 @@
           }
           return result;
         };
-
-        if (_myTrait_.__traitInit && !_myTrait_.hasOwnProperty('__traitInit')) _myTrait_.__traitInit = _myTrait_.__traitInit.slice();
-        if (!_myTrait_.__traitInit) _myTrait_.__traitInit = [];
-        _myTrait_.__traitInit.push(function (id) {});
       })(this);
     };
 

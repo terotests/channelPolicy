@@ -175,7 +175,6 @@ The bonus with the event stream out from the channelObject might be that Event S
 #### Class _chPolicy
 
 
-- [_classFactory](README.md#_chPolicy__classFactory)
 - [constructClientToServer](README.md#_chPolicy_constructClientToServer)
 - [constructServerToClient](README.md#_chPolicy_constructServerToClient)
 - [deltaClientToServer](README.md#_chPolicy_deltaClientToServer)
@@ -241,18 +240,6 @@ The class has following internal singleton variables:
 * _instanceCache
         
         
-### <a name="_chPolicy__classFactory"></a>_chPolicy::_classFactory(id)
-
-
-```javascript
-
-if(!_instanceCache) _instanceCache = {};
-
-if(_instanceCache[id]) return _instanceCache[id];
-
-_instanceCache[id] = this;
-```
-
 ### <a name="_chPolicy_constructClientToServer"></a>_chPolicy::constructClientToServer(clientState)
 
 
@@ -357,15 +344,15 @@ return {
 }
 */
 
-if(!this._done) this._done = {};
+if(!serverState._done) serverState._done = {};
 
 try {
         
     if(!clientFrame.id) return;
     // if(!clientFrame.socket_id) return;
-    if(this._done[clientFrame.id]) return res;
+    if(serverState._done[clientFrame.id]) return res;
     
-    this._done[clientFrame.id] = true;    
+    serverState._done[clientFrame.id] = true;    
     
     var chData = serverState.data; // the channel data object
     var errors = [];
@@ -514,12 +501,6 @@ return result;
 
 ```
 
-### _chPolicy::constructor( id )
-
-```javascript
-
-```
-        
 
 
    
