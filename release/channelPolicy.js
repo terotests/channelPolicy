@@ -51,7 +51,6 @@
       })(this);
 
       (function (_myTrait_) {
-        var _instanceCache;
 
         // Initialize static variables here...
 

@@ -231,8 +231,6 @@ The class has following internal singleton variables:
 
 The class has following internal singleton variables:
         
-* _instanceCache
-        
         
 ### <a name="_chPolicy_constructClientToServer"></a>_chPolicy::constructClientToServer(clientState)
 
