@@ -66,21 +66,69 @@
         });
 
         /**
-         * @param Object serverState
+         * @param Object clientState
          */
-        _myTrait_.constructDeltaDelta = function (serverState) {
+        _myTrait_.constructClientToServer = function (clientState) {
+          var chData = clientState.data;
 
-          var chData = serverState.data;
+          if (!clientState.last_sent) {
+            clientState.last_sent = [];
+          }
 
           // last_update : [1, 30]
-          var start = serverState.last_update[1];
+          var start = clientState.last_sent[1] || 0;
           var end = chData._journal.length;
 
           if (start == end) return null;
 
+          // [2,4]
+          // 0
+          // 1
+          // 2 *
+          // 3 *
+
+          clientState.last_sent[0] = start;
+          clientState.last_sent[1] = end;
+
+          return {
+            id: this.guid(),
+            c: chData._journal.slice(start, end),
+            start: start,
+            end: end,
+            version: clientState.version
+          };
+        };
+
+        /**
+         * @param Object serverState
+         */
+        _myTrait_.constructServerToClient = function (serverState) {
+
+          var chData = serverState.data;
+
+          if (!serverState.last_update) {
+            serverState.last_update = [];
+          }
+
+          // last_update : [1, 30]
+          var start = serverState.last_update[1] || 0;
+          var end = chData._journal.length;
+
+          if (start == end) return null;
+
+          // [2,4]
+          // 0
+          // 1
+          // 2 *
+          // 3 *
+
+          serverState.last_update[0] = start;
+          serverState.last_update[1] = end;
+
           return {
             c: chData._journal.slice(start, end),
             start: start,
+            end: end,
             version: serverState.version
           };
         };
@@ -113,39 +161,157 @@
           }
           */
 
+          if (!this._done) this._done = {};
+
           try {
 
             if (!clientFrame.id) return;
-            if (!clientFrame.socket_id) return;
+            // if(!clientFrame.socket_id) return;
             if (this._done[clientFrame.id]) return res;
 
             this._done[clientFrame.id] = true;
 
             var chData = serverState.data; // the channel data object
+            var errors = [];
 
             // now, it's simple, we just try to apply all the comands
             for (var i = 0; i < clientFrame.c.length; i++) {
               var c = clientFrame.c[i];
-              chData.execCmd(c);
+              var cmdRes = chData.execCmd(c);
+              if (cmdRes !== true) {
+                errors.push(cmdRes);
+              }
             }
-          } catch (e) {}
+
+            return {
+              errors: errors
+            };
+          } catch (e) {
+            // in this version, NO PROBLEMO!
+            return e.message;
+          }
         };
 
         /**
          * @param Object updateFrame  - request from server to client
          * @param float clientState  - This object holds the data the client needs to pefrform it&#39;s actions
          */
-        _myTrait_.deltaServerToClient = function (updateFrame, clientState) {};
+        _myTrait_.deltaServerToClient = function (updateFrame, clientState) {
+
+          // the client state
+          /*
+          {
+          data : channelData,     // The channel data object
+          version : 1,
+          last_update : [1, 30],  // last server update
+          }
+          */
+
+          // the server sends
+          /*
+          {
+          c : chData._journal.slice( start, end ),
+          start : start,
+          end : end,
+          version : serverState.version
+          }
+          */
+          // check where is our last point of action...
+
+          var data = clientState.data; // the channel data we have now
+
+          if (!clientState.last_update) {
+            clientState.last_update = [];
+          }
+          // [2,4] = [start, end]
+          // 0
+          // 1
+          // 2 *
+          // 3 *
+
+          var result = {
+            goodCnt: 0,
+            oldCnt: 0,
+            newCnt: 0,
+            reverseCnt: 0
+          };
+
+          var sameUntil = updateFrame.start - 1;
+
+          if (clientState.needsRefresh) return;
+
+          if (updateFrame.start > data._journal.length) {
+            clientState.needsRefresh = true;
+            result.fail = true;
+            return result;
+          }
+
+          for (var i = updateFrame.start; i < updateFrame.end; i++) {
+
+            var myJ = data.getJournalCmd(i);
+            var serverCmd = updateFrame.c[i - updateFrame.start];
+
+            var bSame = true;
+            if (myJ) {
+              for (var j = 0; j <= 4; j++) {
+                if (myJ[j] != serverCmd[j]) {
+                  bSame = false;
+                }
+              }
+            } else {
+              // a new command has arrived...
+
+              var cmdRes = data.execCmd(serverCmd, true); // true = remote cmd
+              if (cmdRes !== true) {
+                // if we get errors then we have some kind of problem
+                clientState.needsRefresh = true;
+                result.fail = true;
+                result.reason = cmdRes;
+                return result;
+              } else {
+                sameUntil = i;
+                result.goodCnt++;
+                result.newCnt++;
+              }
+
+              continue;
+            }
+            if (bSame) {
+              sameUntil = i;
+              result.goodCnt++;
+              result.oldCnt++;
+            } else {
+              // the sent commands did differ...
+
+              // TODO: rollback
+              data.reverseToLine(sameUntil);
+              // and then run commands without sending them outside...
+              for (var i = sameUntil + 1; i < updateFrame.end; i++) {
+
+                var serverCmd = updateFrame.c[i - updateFrame.start];
+                var cmdRes = data.execCmd(serverCmd, true); // true = remote cmd
+                if (cmdRes !== true) {
+                  // if we get errors then we have some kind of problem
+                  clientState.needsRefresh = true;
+                  result.fail = true;
+                  result.reason = cmdRes;
+                  return result;
+                }
+                result.reverseCnt++;
+              }
+
+              clientState.last_update[0] = updateFrame.start;
+              clientState.last_update[1] = updateFrame.end;
+
+              break;
+            }
+          }
+          return result;
+        };
 
         if (_myTrait_.__traitInit && !_myTrait_.hasOwnProperty('__traitInit')) _myTrait_.__traitInit = _myTrait_.__traitInit.slice();
         if (!_myTrait_.__traitInit) _myTrait_.__traitInit = [];
-        _myTrait_.__traitInit.push(function (channelId, channelData) {
-
-          this._channelId = channelId;
-          this._channel = channelData;
-
-          this._done = {};
-        });
+        _myTrait_.__traitInit.push(function (id) {});
       })(this);
     };
 
@@ -236,25 +402,3 @@
     define(__amdDefs__);
   }
 }).call(new Function('return this')());
-
-// in this version, NO PROBLEMO!
-
-// the client state
-/*
-{
-data : channelData,     // The channel data object
-version : 1,
-last_update : [1, 30],  // last server update
-}
-*/
-
-// the server sends
-/*
-{
-version : 1,                    // the main file + journal version
-start : 34,                     // journal line index
-c : [
-                          // list of channel commands to run
-]
-}
-*/
