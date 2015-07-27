@@ -45,8 +45,8 @@ In the journal the first change is &Delta;[0] and range of changes like &Delta;[
 
 The change request packet contains the changes for the server. The package is created by functions
 
-1.constructClientToServer
-2.constructServerToClient
+1. constructClientToServer
+2. constructServerToClient
 
 The change packate is then sent either from the server to client or client to server.
 
