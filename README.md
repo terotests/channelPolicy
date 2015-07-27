@@ -266,13 +266,21 @@ if( start == end ) return null;
 clientState.last_sent[0] = start;
 clientState.last_sent[1] = end;
 
-return {
+var obj = {
     id : this.guid(),
     c : chData._journal.slice( start, end ),
     start : start,
     end : end,
     version : clientState.version
 };
+
+if(clientState.client) {
+    for(var i=0; i<obj.c.length;i++) {
+        var c = obj.c[i];
+        obj.c[i] = clientState.client._transformCmdFromNs( c );
+    }
+}
+return obj;
 
 ```
 
@@ -435,6 +443,14 @@ if(updateFrame.start > data._journal.length ) {
     result.fail = true;
     return result;
 }
+
+if(clientState.client) {
+    for(var i=updateFrame.start; i<updateFrame.end; i++) {
+        var serverCmd = updateFrame.c[i-updateFrame.start];
+        updateFrame.c[i-updateFrame.start] = clientState.client._transformCmdToNs( serverCmd );
+    }
+}
+
 
 for(var i=updateFrame.start; i<updateFrame.end; i++) {
     
