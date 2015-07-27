@@ -43,15 +43,18 @@ In the journal the first change is &Delta;[0] and range of changes like &Delta;[
 [4, "z", 170, 150, "objectID"]  // &Delta;[34]
 ```
 
-The change request packet is actually a bit more complex, it will be something like this;
+The change request packet contains the changes for the server. The package is created by functions
+
+1.constructClientToServer
+2.constructServerToClient
+
+The change packate is then sent either from the server to client or client to server.
 
 ```javascript
 {
     id          : "transaction ID",     // unique ID for transaction
-    socket_id   : "socketid",           // added by the server
-    v : 1,                              // main file + journal version
-    lu : [1,32],                        // version + journal line of last server update
-    tl : 1,                             // transaction level
+    start : 10,                         // journal start line
+    end   : 13,                         // journal end line
     c : [
         [4, "x", 100, 50,  "objectID"]
         [4, "y", 210, 180, "objectID"]
@@ -60,24 +63,35 @@ The change request packet is actually a bit more complex, it will be something l
 }
 ```
 
-The server is not really too interested about the metadata client sends. The server is just trying to apply the changes the
-client sends then at some point create an update to all clients of the changed state. This update will be referred as &Delta;&Delta;.
+Both client and server have a state, which contains information for the patching function. The functions are
 
+1. deltaClientToServer(clientFrame, serverState)
+2. deltaServerToClient(updateFrame, clientState)
 
-The flow of the data is something like thiss
+The functions mission is to apply the changes to the server state or client state.
 
-1. When client makes a change it will immediately apply &Delta; into it's own main &Omega; 
-2. Then client sends it's latest &Delta; to the server
-3. When server get's &Delta; it will try to apply the change to it's own &Omega;
-4. Periodically the server sends all new journal lines it has accepted to all clients, the  &Delta;&Delta; to all clients - **this is the moment when things start usually go wrong** before this clients have been happily making their own changes without knowing about the changes other clients have done to their own main files.
-5. **All clients are listening for &Delta;&Delta;** - when a client gets &Delta;&Delta; from server, it must update it's own state to correspond those changes **easy to say**
+The server's state object looks like this:
+```javascript
+{
+    data : channelData,     // The channel data object
+    version : 1,
+    last_update : [1, 30],  // the range of last commands sent to the client
+    _done : {}              // hash of handled packet ID's
+}
+```
 
-The purpose of the `channelPolicy` is to be able to determine and test those change policies and what kind of results they will create if applied in certain order.
-
-TODO: continue from here
+The clients's state object looks like this:
 
 ```javascript
-
+{
+    data : channelData,         // The channel data object
+    client : chClientObject,    // The channel client object (for Namespace conversion )
+    needsRefresh : false,   // true if client is out of sync and needs to reload
+    version : 1,
+    last_update : [1, 30],  // last succesfull server update
+    last_sent : [0,1]       // last range sent to the server
+    
+}
 ```
 
 ## TL;RD;
