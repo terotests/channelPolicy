@@ -108,15 +108,14 @@ Transaction object has following properties
     ]
 }
 ```
-# Servers &Delta;&Delta; package format
+# Servers to Client = &Delta;&Delta; package format
 
 ```javascript
 {
-    version : 1,                    // the main file + journal version
-    start : 34,                     // journal line index
-    c : [
-                                    // the servers Omega file commands
-    ]
+    c : [ ... ], // list of commands
+    start : start,
+    end : end,
+    version : serverState.version
 }
 ```
 
