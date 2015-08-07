@@ -247,7 +247,23 @@ if(!clientState.last_sent) {
 var start = clientState.last_sent[1] || 0;
 var end = chData._journal.length;
 
+// last_update[]
+// clientState.last_update
+
+// problems here??
+if(clientState.last_update) {
+    var fromServer = clientState.last_update[1] || 0;
+    if(fromServer >= end) {
+        return null;
+    }
+}
+
+
 if( start == end ) return null;
+
+console.log("clientToServer");
+console.log(clientState.last_update);
+console.log(start,end);
 
 // [2,4]
 // 0 
@@ -346,6 +362,9 @@ return {
 
 if(!serverState._done) serverState._done = {};
 
+console.log("Processing client frame");
+console.log(JSON.stringify(clientFrame));
+
 try {
         
     if(!clientFrame.id) return;
@@ -366,9 +385,12 @@ try {
         }
     }
     
-    return {
+    var results =  {
         errors : errors
     };
+    console.log(JSON.stringify(results));   
+    
+    return results;
 
 } catch(e) {
     // in this version, NO PROBLEMO!
@@ -426,6 +448,9 @@ var result = {
     reverseCnt : 0
 };
 
+console.log("deltaServerToClient");
+console.log(clientState.last_update);
+
 var sameUntil = updateFrame.start-1;
 
 if(clientState.needsRefresh) return;
@@ -454,11 +479,13 @@ for(var i=updateFrame.start; i<updateFrame.end; i++) {
         for(var j=0; j<=4; j++) {
             if(myJ[j] != serverCmd[j]) {
                 bSame = false;
+                console.log("was not the same");
+                console.log(serverCmd[j], "vs", myJ[j] );
             }
         }
     } else {
         // a new command has arrived...
-
+        
         var cmdRes = data.execCmd(serverCmd, true); // true = remote cmd
         if( cmdRes !== true ) {
             // if we get errors then we have some kind of problem
@@ -501,9 +528,11 @@ for(var i=updateFrame.start; i<updateFrame.end; i++) {
         clientState.last_update[0] = updateFrame.start;
         clientState.last_update[1] = updateFrame.end;
         
-        break;
+        return result;
     }
 }
+clientState.last_update[0] = updateFrame.start;
+clientState.last_update[1] = updateFrame.end;
 return result;
 
 

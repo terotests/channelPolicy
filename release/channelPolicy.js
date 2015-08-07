@@ -1,5 +1,5 @@
 // The code template begins here
-'use strict';
+"use strict";
 
 (function () {
 
@@ -39,7 +39,7 @@
          * @param float fn
          */
         _myTrait_.isFunction = function (fn) {
-          return Object.prototype.toString.call(fn) == '[object Function]';
+          return Object.prototype.toString.call(fn) == "[object Function]";
         };
 
         /**
@@ -68,7 +68,22 @@
           var start = clientState.last_sent[1] || 0;
           var end = chData._journal.length;
 
+          // last_update[]
+          // clientState.last_update
+
+          // problems here??
+          if (clientState.last_update) {
+            var fromServer = clientState.last_update[1] || 0;
+            if (fromServer >= end) {
+              return null;
+            }
+          }
+
           if (start == end) return null;
+
+          console.log("clientToServer");
+          console.log(clientState.last_update);
+          console.log(start, end);
 
           // [2,4]
           // 0
@@ -160,6 +175,9 @@
 
           if (!serverState._done) serverState._done = {};
 
+          console.log("Processing client frame");
+          console.log(JSON.stringify(clientFrame));
+
           try {
 
             if (!clientFrame.id) return;
@@ -180,9 +198,12 @@
               }
             }
 
-            return {
+            var results = {
               errors: errors
             };
+            console.log(JSON.stringify(results));
+
+            return results;
           } catch (e) {
             // in this version, NO PROBLEMO!
             return e.message;
@@ -233,6 +254,9 @@
             reverseCnt: 0
           };
 
+          console.log("deltaServerToClient");
+          console.log(clientState.last_update);
+
           var sameUntil = updateFrame.start - 1;
 
           if (clientState.needsRefresh) return;
@@ -260,6 +284,8 @@
               for (var j = 0; j <= 4; j++) {
                 if (myJ[j] != serverCmd[j]) {
                   bSame = false;
+                  console.log("was not the same");
+                  console.log(serverCmd[j], "vs", myJ[j]);
                 }
               }
             } else {
@@ -307,9 +333,11 @@
               clientState.last_update[0] = updateFrame.start;
               clientState.last_update[1] = updateFrame.end;
 
-              break;
+              return result;
             }
           }
+          clientState.last_update[0] = updateFrame.start;
+          clientState.last_update[1] = updateFrame.end;
           return result;
         };
       })(this);
@@ -324,7 +352,7 @@
           m.__factoryClass.forEach(function (initF) {
             res = initF.apply(m, args);
           });
-          if (typeof res == 'function') {
+          if (typeof res == "function") {
             if (res._classInfo.name != _chPolicy._classInfo.name) return new res(a, b, c, d, e, f, g, h);
           } else {
             if (res) return res;
@@ -335,33 +363,33 @@
             initF.apply(m, args);
           });
         } else {
-          if (typeof m.init == 'function') m.init.apply(m, args);
+          if (typeof m.init == "function") m.init.apply(m, args);
         }
       } else return new _chPolicy(a, b, c, d, e, f, g, h);
     };
     // inheritance is here
 
     _chPolicy._classInfo = {
-      name: '_chPolicy'
+      name: "_chPolicy"
     };
     _chPolicy.prototype = new _chPolicy_prototype();
 
     (function () {
-      if (typeof define !== 'undefined' && define !== null && define.amd != null) {
-        __amdDefs__['_chPolicy'] = _chPolicy;
+      if (typeof define !== "undefined" && define !== null && define.amd != null) {
+        __amdDefs__["_chPolicy"] = _chPolicy;
         this._chPolicy = _chPolicy;
-      } else if (typeof module !== 'undefined' && module !== null && module.exports != null) {
-        module.exports['_chPolicy'] = _chPolicy;
+      } else if (typeof module !== "undefined" && module !== null && module.exports != null) {
+        module.exports["_chPolicy"] = _chPolicy;
       } else {
         this._chPolicy = _chPolicy;
       }
-    }).call(new Function('return this')());
+    }).call(new Function("return this")());
 
     (function (_myTrait_) {
 
       // Initialize static variables here...
 
-      if (_myTrait_.__traitInit && !_myTrait_.hasOwnProperty('__traitInit')) _myTrait_.__traitInit = _myTrait_.__traitInit.slice();
+      if (_myTrait_.__traitInit && !_myTrait_.hasOwnProperty("__traitInit")) _myTrait_.__traitInit = _myTrait_.__traitInit.slice();
       if (!_myTrait_.__traitInit) _myTrait_.__traitInit = [];
       _myTrait_.__traitInit.push(function (t) {});
     })(this);
@@ -376,7 +404,7 @@
         m.__factoryClass.forEach(function (initF) {
           res = initF.apply(m, args);
         });
-        if (typeof res == 'function') {
+        if (typeof res == "function") {
           if (res._classInfo.name != channelPolicyModule._classInfo.name) return new res(a, b, c, d, e, f, g, h);
         } else {
           if (res) return res;
@@ -387,18 +415,18 @@
           initF.apply(m, args);
         });
       } else {
-        if (typeof m.init == 'function') m.init.apply(m, args);
+        if (typeof m.init == "function") m.init.apply(m, args);
       }
     } else return new channelPolicyModule(a, b, c, d, e, f, g, h);
   };
   // inheritance is here
 
   channelPolicyModule._classInfo = {
-    name: 'channelPolicyModule'
+    name: "channelPolicyModule"
   };
   channelPolicyModule.prototype = new channelPolicyModule_prototype();
 
-  if (typeof define !== 'undefined' && define !== null && define.amd != null) {
+  if (typeof define !== "undefined" && define !== null && define.amd != null) {
     define(__amdDefs__);
   }
-}).call(new Function('return this')());
+}).call(new Function("return this")());
