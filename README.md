@@ -254,12 +254,16 @@ var end = chData._journal.length;
 if(clientState.last_update) {
     var fromServer = clientState.last_update[1] || 0;
     if(fromServer >= end) {
+        //console.log(" fromServer >= end ");
         return null;
     }
 }
 
 
-if( start == end ) return null;
+if( start == end ) {
+    // console.log(" start == end ");
+    return null;
+}
 
 console.log("clientToServer");
 console.log(clientState.last_update);
@@ -360,6 +364,8 @@ return {
 }
 */
 
+if(!clientFrame) return;
+
 if(!serverState._done) serverState._done = {};
 
 console.log("Processing client frame");
@@ -430,6 +436,8 @@ try {
 */
 // check where is our last point of action...
 
+if(!updateFrame) return;
+
 var data = clientState.data; // the channel data we have now
 
 if(!clientState.last_update) {
@@ -451,11 +459,18 @@ var result = {
 console.log("deltaServerToClient");
 console.log(clientState.last_update);
 
-var sameUntil = updateFrame.start-1;
+var sameUntil = updateFrame.start;
 
-if(clientState.needsRefresh) return;
+if(clientState.needsRefresh) {
+    console.log("** client needs refresh **");
+    return;
+}
 
 if(updateFrame.start > data._journal.length ) {
+
+    console.log("--- setting refresh on because of ---- ");
+    console.log(" updateFrame.start > data._journal.length ");  
+    
     clientState.needsRefresh = true;
     result.fail = true;
     return result;
@@ -489,12 +504,14 @@ for(var i=updateFrame.start; i<updateFrame.end; i++) {
         var cmdRes = data.execCmd(serverCmd, true); // true = remote cmd
         if( cmdRes !== true ) {
             // if we get errors then we have some kind of problem
+                console.log("--- setting refresh on because of ---- ");
+                console.log(JSON.stringify(cmdRes));  
             clientState.needsRefresh = true;
             result.fail = true;
             result.reason = cmdRes;
             return result;             
         } else {         
-            sameUntil = i;
+            sameUntil = i; // ??
             result.goodCnt++;
             result.newCnt++;
         }
@@ -511,11 +528,15 @@ for(var i=updateFrame.start; i<updateFrame.end; i++) {
         // TODO: rollback
         data.reverseToLine( sameUntil  );
         // and then run commands without sending them outside...
-        for(var i=sameUntil+1; i<updateFrame.end; i++) {
+        for(var i=sameUntil; i<updateFrame.end; i++) {
             
             var serverCmd = updateFrame.c[i-updateFrame.start];    
             var cmdRes = data.execCmd(serverCmd, true); // true = remote cmd
             if( cmdRes !== true ) {
+    
+                console.log("--- setting refresh on because of ---- ");
+                console.log(JSON.stringify(cmdRes));                
+                
                 // if we get errors then we have some kind of problem
                 clientState.needsRefresh = true;
                 result.fail = true;
